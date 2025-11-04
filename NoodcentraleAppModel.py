@@ -40,18 +40,23 @@ class NoodcentraleAppModel:
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         scenario_id INTEGER NOT NULL,
                         user_id INTEGER NOT NULL,
-                        FOREIGN KEY (scenario_id) REFERENCES scenario(id),
-                        FOREIGN KEY (user_id) REFERENCES(id)
+                        FOREIGN KEY (scenario_id) REFERENCES scenarios(id),
+                        FOREIGN KEY (user_id) REFERENCES users(id)
                 )
             """)
 
+#actie TEXT NOT NULL,  #Sturen/Opvragen
+#volgorde INTEGER,   #<<Loc>>
+#bericht TEXT NOT NULL #<<naam>>
+
             cur.execute("""
-                CREATE TABLE IF NOT EXISTS scenario_stappen(
+
+                        CREATE TABLE IF NOT EXISTS scenario_stappen(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        scenario_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        actie TEXT NOT NULL,  #Sturen/Opvragen
-                        volgorde INTEGER,   #<<Loc>>
-                        bericht TEXT NOT NULL #<<naam>>
+                        scenario_id INTEGER,
+                        actie TEXT NOT NULL,  
+                        volgorde INTEGER, 
+                        bericht TEXT NOT NULL
                 )
             """)
 
