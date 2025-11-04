@@ -35,6 +35,26 @@ class NoodcentraleAppModel:
                 )
             """)
 
+            cur.execute("""
+                        CREATE TABLE IF NOT EXISTS scenario_users (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        scenario_id INTEGER NOT NULL,
+                        user_id INTEGER NOT NULL,
+                        FOREIGN KEY (scenario_id) REFERENCES scenario(id),
+                        FOREIGN KEY (user_id) REFERENCES(id)
+                )
+            """)
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS scenario_stappen(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        scenario_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        actie TEXT NOT NULL,  #Sturen/Opvragen
+                        volgorde INTEGER,   #<<Loc>>
+                        bericht TEXT NOT NULL #<<naam>>
+                )
+            """)
+
         conn.commit()
         cur.close()
 
@@ -75,4 +95,19 @@ class NoodcentraleAppModel:
     def get_scenarios(self):
         return self.executeQuery("SELECT id, naam, icoon FROM scenarios",fetch=True)
     
+    #STAPPEN
+    #Voeg een nieuwe stappen toe.
+    def add_stappen(self, scenario_id, actie, volgorde, bericht):
+        self.executeQuery("INSERT INTO scenario_stappen (scenario_id, actie, volgorde, bericht) VALUES (?, ?, ?, ?)", (scenario_id, actie, volgorde, bericht))
+
+    def get_stappen(self):
+        return self.executeQuery("SELECT id, scenario_id, actie, volgorde, bericht FROM scenario_stappen",fetch=True)
     
+    
+    #SCENARIO_USERS
+    #Voeg een nieuwe scenario gebruikers toe.
+    def add_scenario_users(self, scenario_id, user_id):
+        self.executeQuery("INSERT INTO scenario_users (scenario_id, user_id) VALUES (?, ?)", (scenario_id, user_id))
+
+    def get_scenario_users(self):
+        return self.executeQuery("SELECT id, scenario_id, user_id FROM scenario_users",fetch=True)
