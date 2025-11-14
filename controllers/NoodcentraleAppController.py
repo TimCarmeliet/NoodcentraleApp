@@ -80,4 +80,13 @@ class CombineerController():
 
     #Combinatie
     def data_inladen(self):
-        pass
+        return self.get_noodcentraleAppModel().get_scenario_users()
+    
+    def get_personen(self):
+        return self.get_noodcentraleAppModel().get_personen()
+    
+    def get_scenarios(self):
+        return self.get_noodcentraleAppModel().get_scenarios()
+    
+    def voeg_koppeling_toe(self, scenario_id, user_id):
+        self.get_noodcentraleAppModel().add_scenario_users(scenario_id, user_id)
