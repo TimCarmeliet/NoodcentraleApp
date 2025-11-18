@@ -6,6 +6,7 @@ from controllers.NoodcentraleAppController import NoodcentraleAppController
 from view.PersonenView import PersonenView
 from view.ScenarioView import ScenarioView
 from view.CombineerView import CombineerView
+from view.StappenView import StappenView
 
 #GUI moet de controller kennen, niet het model
 class NoodcentraleApp():
@@ -47,9 +48,17 @@ class NoodcentraleApp():
             self.get_controller().activate_controller("scenario")
         if selected_tab == "Koppel personen aan scenario's":
             self.get_controller().activate_controller("combineer")
+        if selected_tab == "Voeg stappen toe aan scenario's":
+            self.get_controller().activate_controller("stappen")
 
     def start_scenario(self, scenario_id):
-        messagebox.showinfo("Scenario gestart", f"Scenario met ID {scenario_id} gestart.")
+        self.get_controller().activate_controller("stappen")
+        stappen = self.get_controller().get_active_controller().get_stappen_from_scenario(scenario_id)
+        print(stappen)
+        if len(stappen) == 0:
+            messagebox.showerror("Error", f"Geen stappen gevonden voor dit scenario")
+        else:
+            pass
 
     def refresh_start_scenario_buttons(self):
         # oude knoppen opruimen
@@ -148,6 +157,9 @@ class NoodcentraleApp():
         #Tabblad om de koppeling te leggen
         self.combineer_frame = CombineerView(self.notebook, self.get_controller())
         self.notebook.add(self.combineer_frame, text="Koppel personen aan scenario's")
+
+        self.stappen_frame = StappenView(self.notebook, self.get_controller())
+        self.notebook.add(self.stappen_frame, text="Voeg stappen toe aan scenario's")
 
         #Tabbladen toevoegen aan het config frame
         self.notebook.pack(fill="both", expand=True)

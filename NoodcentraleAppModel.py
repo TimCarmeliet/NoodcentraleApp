@@ -100,6 +100,10 @@ class NoodcentraleAppModel:
     def get_scenarios(self):
         return self.executeQuery("SELECT id, naam, icoon FROM scenarios",fetch=True)
     
+    def get_scenario_id(self, naam):
+        query = "SELECT id from scenarios WHERE naam=\"" + str(naam) + "\""
+        return self.executeQuery(query, fetch=True)
+    
     #STAPPEN
     #Voeg een nieuwe stappen toe.
     def add_stappen(self, scenario_id, actie, volgorde, bericht):
@@ -107,6 +111,12 @@ class NoodcentraleAppModel:
 
     def get_stappen(self):
         return self.executeQuery("SELECT id, scenario_id, actie, volgorde, bericht FROM scenario_stappen",fetch=True)
+    
+    def get_stappen_from_scenario(self, scenario_id):
+        print(scenario_id)
+        stappen = "SELECT * FROM scenario_stappen WHERE scenario_id=" + str(scenario_id) + " order BY volgorde asc"
+        print(stappen)
+        return self.executeQuery(stappen, fetch=True)
     
     
     #SCENARIO_USERS

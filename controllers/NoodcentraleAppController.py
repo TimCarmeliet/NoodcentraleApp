@@ -9,7 +9,8 @@ class NoodcentraleAppController():
         self.__subcontrollers = {
             "personen" : PersonenController(model),
             "scenario" : ScenarioController(model),
-            "combineer": CombineerController(model)
+            "combineer": CombineerController(model),
+            "stappen"  : StappenController(model)
         }
 
         self.__active_controller = None
@@ -53,6 +54,9 @@ class PersonenController():
     def voeg_persoon_toe(self, naam, telefoonnummer):
         self.get_noodcentraleAppModel().add_persoon(naam, telefoonnummer)
 
+    def get_scenario_id(self, naam):
+        pass
+
 #SCENARIO CONTROLLER
 class ScenarioController():
     def __init__(self, model: NoodcentraleAppModel):
@@ -90,3 +94,31 @@ class CombineerController():
     
     def voeg_koppeling_toe(self, scenario_id, user_id):
         self.get_noodcentraleAppModel().add_scenario_users(scenario_id, user_id)
+
+class StappenController():
+    def __init__(self, model: NoodcentraleAppModel):
+        self.__model = model
+    
+    #MODEL
+    def get_noodcentraleAppModel(self):
+        return self.__model
+    
+    #STAPPEN
+    def data_inladen(self):
+        return self.get_noodcentraleAppModel().get_stappen()
+    
+    def get_scenarios(self):
+        return self.get_noodcentraleAppModel().get_scenarios()
+    
+    def get_scenario_id(self, naam):
+        return self.get_noodcentraleAppModel().get_scenario_id(naam)
+    
+    def get_stappen_from_scenario(self, scenario_id):
+        return self.get_noodcentraleAppModel().get_stappen_from_scenario(scenario_id)
+        
+    def voeg_stap_toe(self, scenario_id, actie, volgorde, bericht):
+        self.get_noodcentraleAppModel().add_stappen(scenario_id, actie, volgorde, bericht)
+
+    
+
+    
