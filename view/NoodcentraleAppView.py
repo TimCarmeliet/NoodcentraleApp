@@ -8,6 +8,8 @@ from view.ScenarioView import ScenarioView
 from view.CombineerView import CombineerView
 from view.StappenView import StappenView
 
+from tkinter import simpledialog
+
 #GUI moet de controller kennen, niet het model
 class NoodcentraleApp():
 
@@ -55,10 +57,28 @@ class NoodcentraleApp():
         self.get_controller().activate_controller("stappen")
         stappen = self.get_controller().get_active_controller().get_stappen_from_scenario(scenario_id)
         print(stappen)
+
         if len(stappen) == 0:
             messagebox.showerror("Error", f"Geen stappen gevonden voor dit scenario")
         else:
-            pass
+            locatie = "" #voor mogelijks een locatie in op te slaan doorheen de diverse stappen
+            locatie_nodig_in_bericht = False
+            for stap in stappen:
+                if stap[2] == "locatie":
+                    locatie = simpledialog.askstring("Locatie", str(stap[4]))
+                    locatie_nodig_in_bericht = True
+                if stap[2] == "stuur":
+                    if locatie_nodig_in_bericht:
+                        inhoud_bericht = str(stap[4])
+                        inhoud_bericht = inhoud_bericht.replace("XXX.", locatie + ".")
+                        locatie_nodig_in_bericht = False
+                    else:
+                        inhoud_bericht = str(stap[4])
+                        
+                    messagebox.showinfo("Bericht", str(inhoud_bericht))
+
+            
+
 
     def refresh_start_scenario_buttons(self):
         # oude knoppen opruimen
