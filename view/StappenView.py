@@ -18,7 +18,7 @@ class StappenView(tk.Frame):
 
         self.controller.get_active_controller().voeg_stap_toe(id, actie, volgorde, bericht)
         self.refresh_stappen_tabel()
-
+        
     def refresh_dropdowns(self):
         #scenario's in dropdowns
         scenarios = self.controller.get_active_controller().get_scenarios()
