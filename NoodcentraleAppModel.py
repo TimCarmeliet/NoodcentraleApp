@@ -92,7 +92,7 @@ class NoodcentraleAppModel:
         return self.executeQuery("SELECT id, naam, telefoon_nummer FROM personen",fetch=True)
     
     def get_persoon_naam(self, id):
-        query = "SELECT naam from scenarios WHERE id ="+ str(id)
+        query = "SELECT naam from personen WHERE id ="+ str(id)
         return self.executeQuery(query, fetch=True)
 
    #SCENARIO's
