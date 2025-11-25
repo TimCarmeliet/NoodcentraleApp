@@ -31,7 +31,14 @@ class StappenView(tk.Frame):
         rows = self.controller.get_active_controller().data_inladen()
         self.tree.delete(*self.tree.get_children())
         for row in rows:
-            self.tree.insert("", "end", values=row)
+            scenario_naam = self.controller.get_active_controller().get_scenario_naam(int(row[1]))
+            print(scenario_naam[0][0])
+            # row = row[1]
+            # row = scenario_naam[0][0]
+            lst = list(row)
+            lst[1] = scenario_naam[0][0]
+            t = tuple(lst)
+            self.tree.insert("", "end", values=t)
 
     def build_ui(self):
 
@@ -54,8 +61,8 @@ class StappenView(tk.Frame):
         tk.Button(self, text="Voeg stappen toe", command=self.add_stappen).grid(row=4, column=1, sticky="w", pady=5)
         
         #Tabel met bestaande koppelingen
-        self.tree = ttk.Treeview(self, columns=("id", "scenario_id", "actie", "volgorde", "bericht"), show="headings")
-        for col in ("id", "scenario_id", "actie", "volgorde", "bericht"):
+        self.tree = ttk.Treeview(self, columns=("id", "scenario_naam", "actie", "volgorde", "bericht"), show="headings")
+        for col in ("id", "scenario_naam", "actie", "volgorde", "bericht"):
             self.tree.heading(col, text=col)
             self.tree.grid(row=5, column=0, columnspan=3, sticky="nsew")
 
