@@ -95,6 +95,12 @@ class CombineerController():
     def voeg_koppeling_toe(self, scenario_id, user_id):
         self.get_noodcentraleAppModel().add_scenario_users(scenario_id, user_id)
 
+    def get_persoon_naam(self, user_id):
+        return self.get_noodcentraleAppModel().get_persoon_naam(user_id)
+    
+    def get_scenario_naam(self, scenario_id):
+        return self.get_noodcentraleAppModel().get_scenario_naam(scenario_id)
+
 class StappenController():
     def __init__(self, model: NoodcentraleAppModel):
         self.__model = model
@@ -119,6 +125,8 @@ class StappenController():
     def voeg_stap_toe(self, scenario_id, actie, volgorde, bericht):
         self.get_noodcentraleAppModel().add_stappen(scenario_id, actie, volgorde, bericht)
 
+    def get_scenario_naam(self, scenario_id):
+        return self.get_noodcentraleAppModel().get_scenario_naam(scenario_id)
     
 
     

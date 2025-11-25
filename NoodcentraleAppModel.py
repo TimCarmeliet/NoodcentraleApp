@@ -91,6 +91,9 @@ class NoodcentraleAppModel:
     def get_personen(self):
         return self.executeQuery("SELECT id, naam, telefoon_nummer FROM personen",fetch=True)
     
+    def get_persoon_naam(self, id):
+        query = "SELECT naam from scenarios WHERE id ="+ str(id)
+        return self.executeQuery(query, fetch=True)
 
    #SCENARIO's
     #Voeg een nieuw scenario toe.
@@ -102,6 +105,10 @@ class NoodcentraleAppModel:
     
     def get_scenario_id(self, naam):
         query = "SELECT id from scenarios WHERE naam=\"" + str(naam) + "\""
+        return self.executeQuery(query, fetch=True)
+    
+    def get_scenario_naam(self, id):
+        query = "SELECT naam from scenarios WHERE id ="+ str(id)
         return self.executeQuery(query, fetch=True)
     
     #STAPPEN
@@ -117,6 +124,10 @@ class NoodcentraleAppModel:
         stappen = "SELECT * FROM scenario_stappen WHERE scenario_id=" + str(scenario_id) + " order BY volgorde asc"
         print(stappen)
         return self.executeQuery(stappen, fetch=True)
+    
+    def get_scenario_naam(self, id):
+        query = "SELECT naam from scenarios WHERE id ="+ str(id)
+        return self.executeQuery(query, fetch=True)
     
     
     #SCENARIO_USERS
