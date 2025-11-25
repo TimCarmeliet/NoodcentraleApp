@@ -40,8 +40,11 @@ class CombineerView(tk.Frame):
         rows = self.controller.get_active_controller().data_inladen()
         self.tree.delete(*self.tree.get_children())
         for row in rows:
-            self.tree.insert("", "end", values=row)
-
+            naam = int(row[0])
+            scenario_naam = self.controller.get_active_controller().get_scenario_naam(row[1])
+            user_naam = self.controller.get_active_controller().get_persoon_naam(row[2])
+            self.tree.insert("", "end", values=(naam, scenario_naam[0][0], user_naam[0][0]))
+        
     def build_ui(self):
         #Dropdowns en knop voor koppeling
         tk.Label(self, text="Persoon: ").grid(row=0, column=0, sticky="e", pady=5)
@@ -55,9 +58,10 @@ class CombineerView(tk.Frame):
         tk.Button(self, text="Koppel persoon aan scenario", 
                   command=self.voeg_koppeling_toe).grid(row=2, column=0, columnspan=2, pady=(8, 12))
         
+        # de naam van de personen en scenario's in de tabel weergeven en niet ID's
         #Tabel met bestaande koppelingen
-        self.tree = ttk.Treeview(self, columns=("id", "scenario_id", "user_id"), show="headings")
-        for col in ("id", "scenario_id", "user_id"):
+        self.tree = ttk.Treeview(self, columns=("id", "scenario", "user"), show="headings")
+        for col in ("id", "scenario", "user"):
             self.tree.heading(col, text=col)
             self.tree.grid(row=3, column=0, columnspan=2, sticky="nsew")
 
