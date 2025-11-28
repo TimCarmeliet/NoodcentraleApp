@@ -150,3 +150,6 @@ class NoodcentraleAppModel:
     def get_users_from_scenario(self, scenario_id):
         users = "SELECT * FROM scenario_users WHERE scenario_id=" + str(scenario_id)
         return self.executeQuery(users, fetch=True)
+    
+    def delete_scenario_user(self, id):
+        self.executeQuery("DELETE from scenario_users WHERE id=" + str(id))

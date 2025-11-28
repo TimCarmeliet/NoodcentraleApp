@@ -107,6 +107,9 @@ class CombineerController():
     
     def get_scenario_naam(self, scenario_id):
         return self.get_noodcentraleAppModel().get_scenario_naam(scenario_id)
+    
+    def delete_scenario_user(self, id):
+        return self.get_noodcentraleAppModel().delete_scenario_user(id)
 
 class StappenController():
     def __init__(self, model: NoodcentraleAppModel):
