@@ -88,6 +88,9 @@ class NoodcentraleAppModel:
         """
         self.executeQuery("INSERT INTO personen (naam, telefoon_nummer) VALUES (?, ?)", (naam, telefoon_nummer))
 
+    def delete_persoon(self, id):
+        self.excecuteQuery("DELETE from personen WHERE id=" + str(id))
+
     def get_personen(self):
         return self.executeQuery("SELECT id, naam, telefoon_nummer FROM personen",fetch=True)
     
@@ -100,12 +103,16 @@ class NoodcentraleAppModel:
     def add_scenario(self, naam, icoon):
         self.executeQuery("INSERT INTO scenarios (naam, icoon) VALUES (?, ?)", (naam, icoon))
 
+    def delete_scenario(self, id):
+        self.executeQuery("DELETE from scenarios WHERE id=" + str(id))
+
     def get_scenarios(self):
         return self.executeQuery("SELECT id, naam, icoon FROM scenarios",fetch=True)
     
     def get_scenario_id(self, naam):
         query = "SELECT id from scenarios WHERE naam=\"" + str(naam) + "\""
         return self.executeQuery(query, fetch=True)
+        
     
     def get_scenario_naam(self, id):
         query = "SELECT naam from scenarios WHERE id ="+ str(id)
@@ -116,11 +123,13 @@ class NoodcentraleAppModel:
     def add_stappen(self, scenario_id, actie, volgorde, bericht):
         self.executeQuery("INSERT INTO scenario_stappen (scenario_id, actie, volgorde, bericht) VALUES (?, ?, ?, ?)", (scenario_id, actie, volgorde, bericht))
 
+    def delete_stappen(self, scenario_id):
+        self.excecuteQuery("DELETE from scenario_stappen WHERE scenario_id=" + str(scenario_id))
+
     def get_stappen(self):
         return self.executeQuery("SELECT id, scenario_id, actie, volgorde, bericht FROM scenario_stappen",fetch=True)
     
     def get_stappen_from_scenario(self, scenario_id):
-        print(scenario_id)
         stappen = "SELECT * FROM scenario_stappen WHERE scenario_id=" + str(scenario_id) + " order BY volgorde asc"
         print(stappen)
         return self.executeQuery(stappen, fetch=True)
@@ -137,3 +146,7 @@ class NoodcentraleAppModel:
 
     def get_scenario_users(self):
         return self.executeQuery("SELECT id, scenario_id, user_id FROM scenario_users",fetch=True)
+    
+    def get_users_from_scenario(self, scenario_id):
+        users = "SELECT * FROM scenario_users WHERE scenario_id=" + str(scenario_id)
+        return self.executeQuery(users, fetch=True)

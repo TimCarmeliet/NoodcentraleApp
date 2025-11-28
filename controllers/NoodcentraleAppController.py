@@ -73,6 +73,13 @@ class ScenarioController():
     def voeg_scenario_toe(self, naam, icoon):
         self.get_noodcentraleAppModel().add_scenario(naam, icoon)
 
+    def verwijder_scenario(self, id):
+        if len(self.get_noodcentraleAppModel().get_stappen_from_scenario(id)) == 0 and\
+            len(self.get_noodcentraleAppModel().get_users_from_scenario(id)) == 0:   
+                self.get_noodcentraleAppModel().delete_scenario(id)
+                return True
+        else:
+            return False
 #COMBINEER CONTROLLER
 class CombineerController():
     def __init__(self, model: NoodcentraleAppModel):
