@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 
 class CombineerView(tk.Frame):
     def __init__(self, parent, controller):
@@ -35,6 +35,13 @@ class CombineerView(tk.Frame):
         self.refresh_koppeling_tabel()
         messagebox.showinfo("Succes", f"{persoon_naam} is gekoppeld aan scenario {scenario_id}.")
 
+    def verwijder_koppeling(self):
+        id = int(simpledialog.askstring("Verwijder registratie","Welke persoon wil je verwijderen van welk scenario?"))
+        self.controller.get_active_controller().delete_scenario_user(id)
+        messagebox.showinfo("Succes", "Registratie succesvol verwijderd!")
+        self.refresh_koppeling_tabel()
+
+
     def refresh_koppeling_tabel(self):
         #Toont alle koppelingen in de tabel
         rows = self.controller.get_active_controller().data_inladen()
@@ -58,12 +65,15 @@ class CombineerView(tk.Frame):
         tk.Button(self, text="Koppel persoon aan scenario", 
                   command=self.voeg_koppeling_toe).grid(row=2, column=0, columnspan=2, pady=(8, 12))
         
+        tk.Button(self, text="Verwijder persoon van scenario", 
+                  command=self.verwijder_koppeling).grid(row=3, column=0, columnspan=2, pady=(8, 12))
+        
         # de naam van de personen en scenario's in de tabel weergeven en niet ID's
         #Tabel met bestaande koppelingen
         self.tree = ttk.Treeview(self, columns=("id", "scenario", "user"), show="headings")
         for col in ("id", "scenario", "user"):
             self.tree.heading(col, text=col)
-            self.tree.grid(row=3, column=0, columnspan=2, sticky="nsew")
+            self.tree.grid(row=4, column=0, columnspan=2, sticky="nsew")
 
         self.refresh_dropdowns()
         self.refresh_koppeling_tabel()
