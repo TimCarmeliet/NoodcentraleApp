@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 
 class ScenarioView(tk.Frame):
     def __init__(self, parent, controller):
@@ -20,6 +20,7 @@ class ScenarioView(tk.Frame):
 
         #KNOP OM TOE TE VOEGEN
         tk.Button(self, text="Voeg scenario toe", command=self.voeg_scenario_toe).grid(row=2, column=0, columnspan=2, pady=(8, 12))
+        tk.Button(self, text="Verwijder scenario", command=self.verwijder_scenario).grid(row=3, column=0, columnspan=2, pady=(8, 12))
 
         #activate personen controller
         self.controller.activate_controller("scenario")
@@ -31,7 +32,7 @@ class ScenarioView(tk.Frame):
 
         #scenario tabel refreshen met de recentste date
         self.refresh_scenario_tabel()
-        self.s_tree.grid(row=3, column=0, columnspan=2, pady=5, sticky="nsew")
+        self.s_tree.grid(row=4, column=0, columnspan=2, pady=5, sticky="nsew")
         self.grid_columnconfigure(1, weight=1)
 
 
@@ -46,6 +47,16 @@ class ScenarioView(tk.Frame):
 
         self.controller.get_active_controller().voeg_scenario_toe(naam, icoon)
         self.refresh_scenario_tabel()
+
+    def verwijder_scenario(self):
+        scenario_id = int(simpledialog.askstring("Verwijder Scenario","Welk scenario wil je verwijderen?"))
+        if self.controller.get_active_controller().verwijder_scenario(scenario_id) is False:
+            messagebox.showwarning("Fout", "Gelieve gekoppelde stappen/gebruikers te verwijderen.")
+        else:
+             messagebox.showinfo("Succes", "Scenario succesvol verwijderd!")
+        self.refresh_scenario_tabel()
+
+        
 
     def refresh_scenario_tabel(self):
         rows = self.controller.get_data()

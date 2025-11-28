@@ -56,7 +56,6 @@ class NoodcentraleApp():
     def start_scenario(self, scenario_id):
         self.get_controller().activate_controller("stappen")
         stappen = self.get_controller().get_active_controller().get_stappen_from_scenario(scenario_id)
-        print(stappen)
 
         if len(stappen) == 0:
             messagebox.showerror("Error", f"Geen stappen gevonden voor dit scenario")
