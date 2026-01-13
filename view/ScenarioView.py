@@ -35,6 +35,8 @@ class ScenarioView(tk.Frame):
         self.s_tree.grid(row=4, column=0, columnspan=2, pady=5, sticky="nsew")
         self.grid_columnconfigure(1, weight=1)
 
+        self.s_tree.bind("<ButtonRelease-1>", self.on_tree_click)
+
 
     def voeg_scenario_toe(self):
         naam = self.entry_snaam.get().strip()
@@ -63,4 +65,18 @@ class ScenarioView(tk.Frame):
         self.s_tree.delete(*self.s_tree.get_children())
         for row in rows:
             self.s_tree.insert("", "end", values=row)  
+
+    def on_tree_click(self, event):
+        item_id = self.s_tree.identify_row(event.y)
+        if not item_id:
+            return
+
+        item = self.s_tree.item(item_id)
+        _, naam, icoon = item["values"]
+
+        self.entry_snaam.delete(0, tk.END)
+        self.entry_sicoon.delete(0, tk.END)
+
+        self.entry_snaam.insert(0, naam)
+        self.entry_sicoon.insert(0, icoon)
 

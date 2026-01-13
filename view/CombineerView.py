@@ -74,6 +74,19 @@ class CombineerView(tk.Frame):
         for col in ("id", "scenario", "user"):
             self.tree.heading(col, text=col)
             self.tree.grid(row=4, column=0, columnspan=2, sticky="nsew")
+        
+        self.tree.bind("<ButtonRelease-1>", self.on_tree_click)
 
         self.refresh_dropdowns()
         self.refresh_koppeling_tabel()
+
+    def on_tree_click(self, event):
+        item_id = self.tree.identify_row(event.y)
+        if not item_id:
+            return
+
+        item = self.tree.item(item_id)
+        _, scenario, gebruiker = item["values"]
+
+        self.combo_scenario.set(scenario)
+        self.combo_persoon.set(gebruiker)

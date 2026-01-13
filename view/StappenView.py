@@ -66,6 +66,27 @@ class StappenView(tk.Frame):
             self.tree.heading(col, text=col)
             self.tree.grid(row=5, column=0, columnspan=3, sticky="nsew")
 
+        self.tree.bind("<ButtonRelease-1>", self.on_tree_click)
+
+
 
         self.refresh_dropdowns()
         self.refresh_stappen_tabel()
+
+    def on_tree_click(self, event):
+            item_id = self.tree.identify_row(event.y)
+            if not item_id:
+                return
+
+            item = self.tree.item(item_id)
+            _, scenario, actie, volgorde, bericht = item["values"]
+
+            self.combo_scenario.set(scenario)
+
+            self.entry_actie.delete(0, tk.END)
+            self.entry_volgorde.delete(0, tk.END)
+            self.entry_bericht.delete(0, tk.END)
+
+            self.entry_actie.insert(0, actie)
+            self.entry_volgorde.insert(0, volgorde)
+            self.entry_bericht.insert(0, bericht)
