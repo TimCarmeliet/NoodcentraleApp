@@ -54,8 +54,15 @@ class PersonenController():
     def voeg_persoon_toe(self, naam, telefoonnummer):
         self.get_noodcentraleAppModel().add_persoon(naam, telefoonnummer)
 
-    def get_scenario_id(self, naam):
-        pass
+    def verwijder_persoon(self, id):
+        if len(self.get_noodcentraleAppModel().get_users_from_scenario(id)) == 0:
+            self.get_noodcentraleAppModel().delete_persoon(id)
+            return True
+        else:
+            return False
+
+    def get_persoon_id(self, naam):
+        self.get_noodcentraleAppModel().get_persoon_id(naam)
 
 #SCENARIO CONTROLLER
 class ScenarioController():

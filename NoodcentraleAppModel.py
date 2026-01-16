@@ -88,8 +88,11 @@ class NoodcentraleAppModel:
         """
         self.executeQuery("INSERT INTO personen (naam, telefoon_nummer) VALUES (?, ?)", (naam, telefoon_nummer))
 
+    def get_persoon_id(self, id):
+        return self.executeQuery("SELECT id FROM personen", fetch=True)
+    
     def delete_persoon(self, id):
-        self.excecuteQuery("DELETE from personen WHERE id=" + str(id))
+        self.executeQuery("DELETE from personen WHERE id=" + str(id))
 
     def get_personen(self):
         return self.executeQuery("SELECT id, naam, telefoon_nummer FROM personen",fetch=True)

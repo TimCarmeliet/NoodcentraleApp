@@ -24,6 +24,12 @@ class PersonenView(tk.Frame):
             command=self.voeg_persoon_toe
         ).grid(row=2, column=0, columnspan=2, pady=(8, 12))
 
+        tk.Button(
+            self,
+            text="Verwijder persoon",
+            command=self.verwijder_persoon
+        ).grid(row=2, column=3, columnspan=2, pady=(8, 12))
+
         self.tree = ttk.Treeview(
             self,
             columns=("id", "naam", "telefoonnummer"),
@@ -51,6 +57,28 @@ class PersonenView(tk.Frame):
             return
 
         self.controller.get_active_controller().voeg_persoon_toe(naam, tel)
+        self.refresh_tabel()
+
+    def verwijder_persoon(self, id=None):
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning(
+                "Fout",
+                "Gelieve een persoon te selecteren om te verwijderen."
+            )
+            return
+
+        item = self.tree.item(selected_item)
+        persoon_id = item["values"][0]
+
+        if not self.controller.get_active_controller().verwijder_persoon(persoon_id):
+            messagebox.showwarning(
+                "Fout",
+                "Deze persoon kan niet verwijderd worden omdat hij/zij aan een scenario is gekoppeld."
+            )
+            return
+
+        self.controller.get_active_controller().verwijder_persoon(persoon_id)
         self.refresh_tabel()
 
     def refresh_tabel(self):
