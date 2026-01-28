@@ -39,7 +39,14 @@ class NoodcentraleApp():
         self.config_frame.pack_forget()
         #Start venster openen
         self.start_frame.pack(side="top", fill="both", expand=True)     
-        self.refresh_start_scenario_buttons() 
+        self.refresh_start_scenario_buttons()
+    
+    def refresh_dropdown_views(self):
+        """Refresh dropdowns in CombineerView en StappenView wanneer personen/scenario's veranderen"""
+        if hasattr(self, 'combineer_frame'):
+            self.combineer_frame.refresh_dropdowns()
+        if hasattr(self, 'stappen_frame'):
+            self.stappen_frame.refresh_dropdowns() 
 
     def on_tab_changed(self, event):
         selected_tab = event.widget.tab(event.widget.select(), "text")
@@ -63,10 +70,12 @@ class NoodcentraleApp():
             locatie = "" #voor mogelijks een locatie in op te slaan doorheen de diverse stappen
             locatie_nodig_in_bericht = False
             for stap in stappen:
-                if stap[2] == "locatie":
+                if stap[2] == "Geen":
+                    continue
+                if stap[2] == "Locatie":
                     locatie = simpledialog.askstring("Locatie", str(stap[4]))
                     locatie_nodig_in_bericht = True
-                if stap[2] == "stuur":
+                if stap[2] == "Stuur":
                     if locatie_nodig_in_bericht:
                         inhoud_bericht = str(stap[4])
                         inhoud_bericht = inhoud_bericht.replace("XXX.", locatie + ".")
@@ -166,11 +175,11 @@ class NoodcentraleApp():
         self.notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
         #Tabblad om personen te beheren
-        self.person_frame = PersonenView(self.notebook, self.get_controller())
+        self.person_frame = PersonenView(self.notebook, self.get_controller(), app_parent=self)
         self.notebook.add(self.person_frame, text="Personen")
 
         #Tabblad om scenario's te beheren
-        self.scenario_frame = ScenarioView(self.notebook, self.get_controller())
+        self.scenario_frame = ScenarioView(self.notebook, self.get_controller(), app_parent=self)
         self.notebook.add(self.scenario_frame, text="Scenario's")
 
         #Tabblad om de koppeling te leggen

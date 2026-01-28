@@ -11,6 +11,8 @@ class CombineerView(tk.Frame):
 
     def refresh_dropdowns(self):
         #Laad personen en scenario's in dropdowns
+        # Zorg ervoor dat we naar de CombineerController switchelen
+        self.controller.activate_controller("combineer")
         personen = self.controller.get_active_controller().get_personen()
         scenarios = self.controller.get_active_controller().get_scenarios()
 
@@ -35,8 +37,30 @@ class CombineerView(tk.Frame):
         self.refresh_koppeling_tabel()
         messagebox.showinfo("Succes", f"{persoon_naam} is gekoppeld aan scenario {scenario_id}.")
 
+    def werk_koppeling_bij(self):
+        #werk een bestaande koppeling bij
+        geselecteerde_item = self.tree.item(self.tree.selection())
+        if not geselecteerde_item:
+            messagebox.showwarning("Fout", "Gelieve een koppeling te selecteren om bij te werken.")
+            return
+
+        koppeling_id = geselecteerde_item['values'][0]
+        persoon_naam = self.combo_persoon.get()
+        scenario_naam = self.combo_scenario.get()
+
+        if not persoon_naam or not scenario_naam:
+            messagebox.showwarning("Fout" , "Gelieve een persoon en scenario te selecteren.")
+            return
+
+        persoon_id = self.personen_dict[persoon_naam]
+        scenario_id = self.scenario_dict[scenario_naam]
+
+        self.controller.get_active_controller().werk_koppeling_bij(koppeling_id, scenario_id, persoon_id)
+        self.refresh_koppeling_tabel()
+        messagebox.showinfo("Succes", "Koppeling succesvol bijgewerkt.")
+
     def verwijder_koppeling(self):
-        id = int(simpledialog.askstring("Verwijder registratie","Welke persoon wil je verwijderen van welk scenario?"))
+        id = self.tree.item(self.tree.selection())['values'][0]
         self.controller.get_active_controller().delete_scenario_user(id)
         messagebox.showinfo("Succes", "Registratie succesvol verwijderd!")
         self.refresh_koppeling_tabel()
@@ -65,15 +89,18 @@ class CombineerView(tk.Frame):
         tk.Button(self, text="Koppel persoon aan scenario", 
                   command=self.voeg_koppeling_toe).grid(row=2, column=0, columnspan=2, pady=(8, 12))
         
+        tk.Button(self, text="Werk koppeling bij", 
+                  command=self.werk_koppeling_bij).grid(row=3, column=0, columnspan=2, pady=(8, 12))
+        
         tk.Button(self, text="Verwijder persoon van scenario", 
-                  command=self.verwijder_koppeling).grid(row=3, column=0, columnspan=2, pady=(8, 12))
+                  command=self.verwijder_koppeling).grid(row=4, column=0, columnspan=2, pady=(8, 12))
         
         # de naam van de personen en scenario's in de tabel weergeven en niet ID's
         #Tabel met bestaande koppelingen
         self.tree = ttk.Treeview(self, columns=("id", "scenario", "user"), show="headings")
         for col in ("id", "scenario", "user"):
             self.tree.heading(col, text=col)
-            self.tree.grid(row=4, column=0, columnspan=2, sticky="nsew")
+            self.tree.grid(row=5, column=0, columnspan=2, sticky="nsew")
         
         self.tree.bind("<ButtonRelease-1>", self.on_tree_click)
 

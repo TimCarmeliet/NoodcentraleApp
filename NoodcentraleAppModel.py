@@ -88,8 +88,11 @@ class NoodcentraleAppModel:
         """
         self.executeQuery("INSERT INTO personen (naam, telefoon_nummer) VALUES (?, ?)", (naam, telefoon_nummer))
 
+    def get_persoon_id(self, id):
+        return self.executeQuery("SELECT id FROM personen", fetch=True)
+    
     def delete_persoon(self, id):
-        self.excecuteQuery("DELETE from personen WHERE id=" + str(id))
+        self.executeQuery("DELETE from personen WHERE id=" + str(id))
 
     def get_personen(self):
         return self.executeQuery("SELECT id, naam, telefoon_nummer FROM personen",fetch=True)
@@ -97,6 +100,9 @@ class NoodcentraleAppModel:
     def get_persoon_naam(self, id):
         query = "SELECT naam from personen WHERE id ="+ str(id)
         return self.executeQuery(query, fetch=True)
+    
+    def update_persoon(self, id, naam, telefoon_nummer):
+        self.executeQuery("UPDATE personen SET naam = ?, telefoon_nummer = ? WHERE id = ?", (naam, telefoon_nummer, id))
 
    #SCENARIO's
     #Voeg een nieuw scenario toe.
@@ -118,13 +124,20 @@ class NoodcentraleAppModel:
         query = "SELECT naam from scenarios WHERE id ="+ str(id)
         return self.executeQuery(query, fetch=True)
     
+    def update_scenario(self, id, naam, icoon):
+        self.executeQuery("UPDATE scenarios SET naam = ?, icoon = ? WHERE id = ?", (naam, icoon, id))
+        
     #STAPPEN
     #Voeg een nieuwe stappen toe.
     def add_stappen(self, scenario_id, actie, volgorde, bericht):
         self.executeQuery("INSERT INTO scenario_stappen (scenario_id, actie, volgorde, bericht) VALUES (?, ?, ?, ?)", (scenario_id, actie, volgorde, bericht))
 
+
+    def update_stappen(self, id, scenario_id, actie, volgorde, bericht):
+        self.executeQuery("UPDATE scenario_stappen SET scenario_id = ?, actie = ?, volgorde = ?, bericht = ? WHERE id = ?", (scenario_id, actie, volgorde, bericht, id))
+
     def delete_stappen(self, scenario_id):
-        self.excecuteQuery("DELETE from scenario_stappen WHERE scenario_id=" + str(scenario_id))
+        self.executeQuery("DELETE from scenario_stappen WHERE scenario_id=" + str(scenario_id))
 
     def get_stappen(self):
         return self.executeQuery("SELECT id, scenario_id, actie, volgorde, bericht FROM scenario_stappen",fetch=True)
@@ -137,7 +150,6 @@ class NoodcentraleAppModel:
     def get_scenario_naam(self, id):
         query = "SELECT naam from scenarios WHERE id ="+ str(id)
         return self.executeQuery(query, fetch=True)
-    
     
     #SCENARIO_USERS
     #Voeg een nieuwe scenario gebruikers toe.
@@ -153,3 +165,6 @@ class NoodcentraleAppModel:
     
     def delete_scenario_user(self, id):
         self.executeQuery("DELETE from scenario_users WHERE id=" + str(id))
+
+    def update_scenario_users(self, id, scenario_id, user_id):
+        self.executeQuery("UPDATE scenario_users SET scenario_id = ?, user_id = ? WHERE id = ?", (scenario_id, user_id, id))

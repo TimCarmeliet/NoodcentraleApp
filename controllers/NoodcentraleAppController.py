@@ -54,8 +54,18 @@ class PersonenController():
     def voeg_persoon_toe(self, naam, telefoonnummer):
         self.get_noodcentraleAppModel().add_persoon(naam, telefoonnummer)
 
-    def get_scenario_id(self, naam):
-        pass
+    def verwijder_persoon(self, id):
+        if len(self.get_noodcentraleAppModel().get_users_from_scenario(id)) == 0:
+            self.get_noodcentraleAppModel().delete_persoon(id)
+            return True
+        else:
+            return False
+
+    def get_persoon_id(self, naam):
+        self.get_noodcentraleAppModel().get_persoon_id(naam)
+
+    def werk_persoon_bij(self, id, naam, telefoon_nummer):
+        self.get_noodcentraleAppModel().update_persoon(id, naam, telefoon_nummer)
 
 #SCENARIO CONTROLLER
 class ScenarioController():
@@ -80,6 +90,10 @@ class ScenarioController():
                 return True
         else:
             return False
+        
+    def werk_scenario_bij(self, id, naam, icoon):
+        self.get_noodcentraleAppModel().update_scenario(id, naam, icoon)
+        
 #COMBINEER CONTROLLER
 class CombineerController():
     def __init__(self, model: NoodcentraleAppModel):
@@ -110,6 +124,9 @@ class CombineerController():
     
     def delete_scenario_user(self, id):
         return self.get_noodcentraleAppModel().delete_scenario_user(id)
+    
+    def werk_koppeling_bij(self, id, scenario_id, user_id):
+        self.get_noodcentraleAppModel().update_scenario_users(id, scenario_id, user_id)
 
 class StappenController():
     def __init__(self, model: NoodcentraleAppModel):
@@ -125,7 +142,7 @@ class StappenController():
     
     def get_scenarios(self):
         return self.get_noodcentraleAppModel().get_scenarios()
-    
+        
     def get_scenario_id(self, naam):
         return self.get_noodcentraleAppModel().get_scenario_id(naam)
     
@@ -135,8 +152,13 @@ class StappenController():
     def voeg_stap_toe(self, scenario_id, actie, volgorde, bericht):
         self.get_noodcentraleAppModel().add_stappen(scenario_id, actie, volgorde, bericht)
 
+    def werk_stap_bij(self, id, scenario_id, actie, volgorde, bericht):
+        self.get_noodcentraleAppModel().update_stappen(id, scenario_id, actie, volgorde, bericht)
+
+    def verwijder_stappen(self, scenario_id):
+        self.get_noodcentraleAppModel().delete_stappen(scenario_id)
+
     def get_scenario_naam(self, scenario_id):
         return self.get_noodcentraleAppModel().get_scenario_naam(scenario_id)
-    
 
     
