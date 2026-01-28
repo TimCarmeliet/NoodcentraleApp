@@ -12,20 +12,56 @@ class StappenView(tk.Frame):
         scenario = self.combo_scenario.get()
         scenario_id = self.controller.get_active_controller().get_scenario_id(scenario)
         id = scenario_id[0][0]
-        actie = self.entry_actie.get()
+        actie = self.combo_actie.get()
         volgorde = self.entry_volgorde.get()
         bericht = self.entry_bericht.get()
 
         self.controller.get_active_controller().voeg_stap_toe(id, actie, volgorde, bericht)
         self.refresh_stappen_tabel()
-        
+        # Ledig de invoervelden na succesvol toevoegen
+        self.entry_volgorde.delete(0, tk.END)
+        self.entry_bericht.delete(0, tk.END)
+        self.combo_actie.set('')
+        messagebox.showinfo("Succes", "Stap succesvol toegevoegd!")
+
+    def update_stappen(self):
+        geselecteerde_item = self.tree.item(self.tree.selection())
+        if not geselecteerde_item:
+            messagebox.showwarning("Fout", "Gelieve een stap te selecteren om bij te werken.")
+            return
+
+        stap_id = geselecteerde_item['values'][0]
+        scenario = self.combo_scenario.get()
+        scenario_id = self.controller.get_active_controller().get_scenario_id(scenario)
+        id = scenario_id[0][0]
+        actie = self.combo_actie.get()
+        volgorde = self.entry_volgorde.get()
+        bericht = self.entry_bericht.get()
+
+        self.controller.get_active_controller().werk_stap_bij(stap_id, id, actie, volgorde, bericht)
+        self.refresh_stappen_tabel()
+        messagebox.showinfo("Succes", "Stap succesvol bijgewerkt.")
+
+    def delete_stappen(self):
+        scenario = self.combo_scenario.get()
+        scenario_id = self.controller.get_active_controller().get_scenario_id(scenario)
+        id = scenario_id[0][0]
+
+        self.controller.get_active_controller().verwijder_stappen(id)
+        self.refresh_stappen_tabel()
+
     def refresh_dropdowns(self):
         #scenario's in dropdowns
+        # Zorg ervoor dat we naar de StappenController switchelen
+        self.controller.activate_controller("stappen")
         scenarios = self.controller.get_active_controller().get_scenarios()
 
         self.scenario_dict = {s[1]: s[0] for s in scenarios}  # naam -> id
 
         self.combo_scenario['values'] = list(self.scenario_dict.keys())
+        
+        # Actie opties
+        self.combo_actie['values'] = ["Geen", "Locatie", "Stuur"]
 
     def refresh_stappen_tabel(self):
         rows = self.controller.get_active_controller().data_inladen()
@@ -46,9 +82,15 @@ class StappenView(tk.Frame):
         self.combo_scenario = ttk.Combobox(self, width=47, state="readonly")
         self.combo_scenario.grid(row=0, column=1, sticky="w", pady=5)
 
+        """
         tk.Label(self, text="Actie (optioneel):").grid(row=1, column=0, sticky="e", pady=5)
         self.entry_actie = tk.Entry(self, width=50)
         self.entry_actie.grid(row=1, column=1, sticky="w", pady=5)
+        """
+
+        tk.Label(self, text="Actie (optioneel):").grid(row=1, column=0, sticky="e", pady=5)
+        self.combo_actie = ttk.Combobox(self, width=47, state="readonly")
+        self.combo_actie.grid(row=1, column=1, sticky="w", pady=5)
 
         tk.Label(self, text="Volgorde:").grid(row=2, column=0, sticky="e", pady=5)
         self.entry_volgorde = tk.Entry(self, width=50)
@@ -59,12 +101,14 @@ class StappenView(tk.Frame):
         self.entry_bericht.grid(row=3, column=1, sticky="w", pady=5)
 
         tk.Button(self, text="Voeg stappen toe", command=self.add_stappen).grid(row=4, column=1, sticky="w", pady=5)
+        tk.Button(self, text="Werk geselecteerde stap bij", command=self.update_stappen).grid(row=5, column=1, sticky="w", pady=5)
+        tk.Button(self, text="Delete alle stappen van dit scenario", command=self.delete_stappen).grid(row=6, column=1, sticky="w", pady=5)
         
         #Tabel met bestaande koppelingen
         self.tree = ttk.Treeview(self, columns=("id", "scenario_naam", "actie", "volgorde", "bericht"), show="headings")
         for col in ("id", "scenario_naam", "actie", "volgorde", "bericht"):
             self.tree.heading(col, text=col)
-            self.tree.grid(row=5, column=0, columnspan=3, sticky="nsew")
+            self.tree.grid(row=7, column=0, columnspan=3, sticky="nsew")
 
         self.tree.bind("<ButtonRelease-1>", self.on_tree_click)
 
@@ -83,10 +127,8 @@ class StappenView(tk.Frame):
 
             self.combo_scenario.set(scenario)
 
-            self.entry_actie.delete(0, tk.END)
+            self.combo_actie.set(actie)
             self.entry_volgorde.delete(0, tk.END)
             self.entry_bericht.delete(0, tk.END)
-
-            self.entry_actie.insert(0, actie)
             self.entry_volgorde.insert(0, volgorde)
             self.entry_bericht.insert(0, bericht)
