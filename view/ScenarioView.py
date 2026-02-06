@@ -1,82 +1,121 @@
-import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.tab import MDTabsBase
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.button import MDFillRoundFlatButton, MDFlatButton, MDFloatingActionButton
+from kivymd.uix.list import MDList
+from kivymd.uix.scrollview import MDScrollView
+from kivymd.toast import toast
+from kivy.metrics import dp
+from kivymd.app import MDApp
+from kivy.core.window import Window
+from .components import ModernEditOverlay, EditCard
+from kivymd.uix.list import TwoLineAvatarIconListItem, IconLeftWidget
 
-class ScenarioView(tk.Frame):
-    def __init__(self, parent, controller):
-        super().__init__(parent)
+class ScenarioView(MDFloatLayout, MDTabsBase):
+    def __init__(self, controller, **kwargs):
+        super().__init__(**kwargs)
         self.controller = controller
-        self.controller.activate_controller("scenario")
         self.build_ui()
 
     def build_ui(self):
-        #VELDEN OM EEN NIEUW SCENARIO TOE TE VOEGEN
-        tk.Label(self, text="Naam: ").grid(row=0, column=0, sticky="e", pady=5)
-        self.entry_snaam = tk.Entry(self, width=50)
-        self.entry_snaam.grid(row=0, column=1, sticky="w", pady=5)
+        scroll = MDScrollView()
+        self.list_container = MDList(padding=dp(12), spacing=dp(8))
+        scroll.add_widget(self.list_container)
         
-        tk.Label(self, text="Icoon: ").grid(row=1, column=0, sticky="e", padx=(0, 1), pady=5)
-        self.entry_sicoon = tk.Entry(self, width=50)
-        self.entry_sicoon.grid(row=1, column=1, sticky="w", pady=5)
-
-        #KNOP OM TOE TE VOEGEN
-        tk.Button(self, text="Voeg scenario toe", command=self.voeg_scenario_toe).grid(row=2, column=0, columnspan=2, pady=(8, 12))
-        tk.Button(self, text="Verwijder scenario", command=self.verwijder_scenario).grid(row=3, column=0, columnspan=2, pady=(8, 12))
-
-        #activate personen controller
-        self.controller.activate_controller("scenario")
-
-        #SCENARIO tabel toevoegen
-        self.s_tree = ttk.Treeview(self, columns=("id", "naam", "naam icoon"), show="headings")
-        for col in ("id", "naam", "naam icoon"):
-            self.s_tree.heading(col, text=col)
-
-        #scenario tabel refreshen met de recentste date
+        self.add_widget(scroll)
+        
+        self.fab = MDFloatingActionButton(
+            icon="plus",
+            pos_hint={"right": 0.95, "bottom": 0.05},
+            md_bg_color=[0.2, 0.7, 0.6, 1]  # Teal
+        )
+        self.fab.bind(on_release=lambda x: self.open_edit_dialog(None))
+        self.add_widget(self.fab)
+        
         self.refresh_scenario_tabel()
-        self.s_tree.grid(row=4, column=0, columnspan=2, pady=5, sticky="nsew")
-        self.grid_columnconfigure(1, weight=1)
 
-        self.s_tree.bind("<ButtonRelease-1>", self.on_tree_click)
+    def open_edit_dialog(self, scenario_data=None):
+        self.overlay = ModernEditOverlay()
+        card = EditCard(size_hint=(0.85, None), height=dp(300))
+        
+        name_field = MDTextField(hint_text="Naam Scenario", mode="rectangle")
+        icon_field = MDTextField(hint_text="Icoon bestandsnaam", mode="rectangle")
+        
+        if scenario_data:
+            name_field.text = scenario_data[1]
+            icon_field.text = scenario_data[2]
+            
+        card.add_widget(name_field)
+        card.add_widget(icon_field)
+        
+        btn_box = MDBoxLayout(orientation="horizontal", spacing=dp(10), size_hint_y=None, height=dp(50))
+        
+        btn_cancel = MDFlatButton(text="ANNULEER")
+        btn_cancel.bind(on_release=self.overlay.dismiss)
+        
+        btn_save = MDFillRoundFlatButton(text="OPSLAAN" if scenario_data else "TOEVOEGEN")
+        btn_save.bind(on_release=lambda x: self.save_scenario(
+            scenario_data[0] if scenario_data else None,
+            name_field.text,
+            icon_field.text
+        ))
+        
+        btn_box.add_widget(btn_cancel)
+        btn_box.add_widget(btn_save)
+        
+        if scenario_data:
+            btn_delete = MDFlatButton(text="VERWIJDER", theme_text_color="Error")
+            btn_delete.bind(on_release=lambda x: self.delete_scenario(scenario_data[0]))
+            btn_box.add_widget(btn_delete)
 
+        card.add_widget(btn_box)
+        
+        self.overlay.content_widget = card
+        self.overlay.add_widget(card)
+        Window.add_widget(self.overlay)
+        self.overlay.open()
 
-    def voeg_scenario_toe(self):
-        naam = self.entry_snaam.get().strip()
-        icoon = self.entry_sicoon.get().strip()
-
-        #CONTROLE volledig ingevoerd?
+    def save_scenario(self, sid, naam, icoon):
+        self.controller.activate_controller("scenario")
+        naam = naam.strip()
+        icoon = icoon.strip()
+        
         if not naam or not icoon:
-            messagebox.showwarning("Fout", "Gelieve naam en de bestandsnaam van het icoon in te vullen.")
+            toast("Vul alles in.")
             return
 
-        self.controller.get_active_controller().voeg_scenario_toe(naam, icoon)
-        self.refresh_scenario_tabel()
-
-    def verwijder_scenario(self):
-        scenario_id = int(simpledialog.askstring("Verwijder Scenario","Welk scenario wil je verwijderen?"))
-        if self.controller.get_active_controller().verwijder_scenario(scenario_id) is False:
-            messagebox.showwarning("Fout", "Gelieve gekoppelde stappen/gebruikers te verwijderen.")
+        if sid:
+            # Correctly update the scenario without deleting it (which preserves ID and links)
+            self.controller.get_active_controller().update_scenario(sid, naam, icoon)
+            toast("Aangepast!")
         else:
-             messagebox.showinfo("Succes", "Scenario succesvol verwijderd!")
+            self.controller.get_active_controller().voeg_scenario_toe(naam, icoon)
+            toast("Toegevoegd!")
+            
+        self.overlay.dismiss()
         self.refresh_scenario_tabel()
 
-        
+    def delete_scenario(self, sid):
+        self.controller.activate_controller("scenario")
+        if self.controller.get_active_controller().verwijder_scenario(sid) is False:
+            toast("Fout: Verwijder eerst gekoppelde items.")
+        else:
+            toast("Verwijderd!")
+            self.overlay.dismiss()
+        self.refresh_scenario_tabel()
 
     def refresh_scenario_tabel(self):
+        self.controller.activate_controller("scenario")
         rows = self.controller.get_data()
-        self.s_tree.delete(*self.s_tree.get_children())
+        self.list_container.clear_widgets()
         for row in rows:
-            self.s_tree.insert("", "end", values=row)  
-
-    def on_tree_click(self, event):
-        item_id = self.s_tree.identify_row(event.y)
-        if not item_id:
-            return
-
-        item = self.s_tree.item(item_id)
-        _, naam, icoon = item["values"]
-
-        self.entry_snaam.delete(0, tk.END)
-        self.entry_sicoon.delete(0, tk.END)
-
-        self.entry_snaam.insert(0, naam)
-        self.entry_sicoon.insert(0, icoon)
+            item = TwoLineAvatarIconListItem(
+                text=row[1],
+                secondary_text=f"Icoon: {row[2]}"
+            )
+            icon = IconLeftWidget(icon="alert-circle-outline")
+            item.add_widget(icon)
+            item.bind(on_release=lambda x, r=row: self.open_edit_dialog(r))
+            self.list_container.add_widget(item)
 

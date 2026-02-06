@@ -79,14 +79,10 @@ class NoodcentraleAppModel:
     #PERSONEN
     #Voeg een nieuwe persoon toe.
     def add_persoon(self, naam, telefoon_nummer):
-        """
-            with self.connect() as conn:
-                cur = conn.cursor()
-                cur.execute("INSERT INTO users (naam, telefoon_nummer) VALUES (?, ?)", (naam, telefoon_nummer))
-                conn.commit()
-                cur.close()
-        """
         self.executeQuery("INSERT INTO personen (naam, telefoon_nummer) VALUES (?, ?)", (naam, telefoon_nummer))
+
+    def update_persoon(self, id, naam, telefoon_nummer):
+        self.executeQuery("UPDATE personen SET naam=?, telefoon_nummer=? WHERE id=?", (naam, telefoon_nummer, id))
 
     def delete_persoon(self, id):
         self.excecuteQuery("DELETE from personen WHERE id=" + str(id))
@@ -102,6 +98,9 @@ class NoodcentraleAppModel:
     #Voeg een nieuw scenario toe.
     def add_scenario(self, naam, icoon):
         self.executeQuery("INSERT INTO scenarios (naam, icoon) VALUES (?, ?)", (naam, icoon))
+
+    def update_scenario(self, id, naam, icoon):
+        self.executeQuery("UPDATE scenarios SET naam=?, icoon=? WHERE id=?", (naam, icoon, id))
 
     def delete_scenario(self, id):
         self.executeQuery("DELETE from scenarios WHERE id=" + str(id))
@@ -124,7 +123,11 @@ class NoodcentraleAppModel:
         self.executeQuery("INSERT INTO scenario_stappen (scenario_id, actie, volgorde, bericht) VALUES (?, ?, ?, ?)", (scenario_id, actie, volgorde, bericht))
 
     def delete_stappen(self, scenario_id):
-        self.excecuteQuery("DELETE from scenario_stappen WHERE scenario_id=" + str(scenario_id))
+        self.executeQuery("DELETE from scenario_stappen WHERE scenario_id=" + str(scenario_id))
+
+    def delete_stap(self, stap_id):
+        """Delete a single step by its ID"""
+        self.executeQuery("DELETE from scenario_stappen WHERE id=" + str(stap_id))
 
     def get_stappen(self):
         return self.executeQuery("SELECT id, scenario_id, actie, volgorde, bericht FROM scenario_stappen",fetch=True)
