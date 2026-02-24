@@ -66,6 +66,62 @@ class PersonenController():
 
     def werk_persoon_bij(self, id, naam, telefoon_nummer):
         self.get_noodcentraleAppModel().update_persoon(id, naam, telefoon_nummer)
+    
+    # VALIDATIES
+    def validate_persoon_name(self, naam, exclude_id=None):
+        """
+        Valideer de naam van de persoon.
+        Returns: (is_valid, error_message)
+        """
+        # Check of naam leeg is
+        if not naam or naam.strip() == "":
+            return False, "De naam van de persoon mag niet leeg zijn."
+        
+        # Check op dubbele namen
+        personen = self.get_noodcentraleAppModel().get_personen()
+        for persoon in personen:
+            persoon_id, persoon_naam, _ = persoon
+            # Als we aan het updaten zijn, skip dan de persoon die we aan het bewerken zijn
+            if exclude_id and persoon_id == exclude_id:
+                continue
+            if persoon_naam.lower() == naam.lower():
+                return False, f"Een persoon met de naam '{naam}' bestaat al."
+        
+        return True, ""
+    
+    def validate_persoon_phone(self, telefoonnummer, exclude_id=None):
+        """
+        Valideer het telefoonnummer van de persoon.
+        Returns: (is_valid, error_message)
+        """
+        # Check of telefoonnummer leeg is
+        if not telefoonnummer or telefoonnummer.strip() == "":
+            return False, "Het telefoonnummer mag niet leeg zijn."
+        
+        # Check op dubbele telefoonnummers
+        personen = self.get_noodcentraleAppModel().get_personen()
+        for persoon in personen:
+            persoon_id, _, persoon_tel = persoon
+            # Als we aan het updaten zijn, skip dan de persoon die we aan het bewerken zijn
+            if exclude_id and persoon_id == exclude_id:
+                continue
+            if persoon_tel == telefoonnummer:
+                return False, f"Het telefoonnummer '{telefoonnummer}' is al in gebruik door een ander persoon."
+        
+        return True, ""
+    
+    def validate_persoon_deletion(self, id):
+        """
+        Valideer of de persoon verwijderd kan worden.
+        Returns: (can_delete, error_message)
+        """
+        gekoppeld = self.get_noodcentraleAppModel().get_users_from_scenario(id)
+        
+        if len(gekoppeld) > 0:
+            error_message = f"Deze persoon is gekoppeld aan {len(gekoppeld)} scenario(s). U moet eerst deze koppelingen verwijderen."
+            return False, error_message
+        
+        return True, ""
 
 #SCENARIO CONTROLLER
 class ScenarioController():
@@ -90,9 +146,88 @@ class ScenarioController():
                 return True
         else:
             return False
+
+    def validate_scenario_deletion(self, id):
+        """
+        Valideer of het scenario verwijderd kan worden.
+        Returns: (can_delete, error_message)
+        """
+        stappen = self.get_noodcentraleAppModel().get_stappen_from_scenario(id)
+        users = self.get_noodcentraleAppModel().get_users_from_scenario(id)
+        
+        errors = []
+        
+        # Check op gekoppelde stappen
+        if len(stappen) > 0:
+            errors.append(f"Er zijn {len(stappen)} stap(pen) gekoppeld aan dit scenario.")
+        
+        # Check op gekoppelde gebruikers
+        if len(users) > 0:
+            errors.append(f"Er zijn {len(users)} persoon(en) gekoppeld aan dit scenario.")
+        
+        if errors:
+            error_message = "Dit scenario kan niet verwijderd worden:\n" + "\n".join(f"• {e}" for e in errors)
+            return False, error_message
+        
+        return True, ""
         
     def werk_scenario_bij(self, id, naam, icoon):
         self.get_noodcentraleAppModel().update_scenario(id, naam, icoon)
+    
+    # VALIDATIES bij scenario's
+    def validate_scenario_name(self, naam, exclude_id=None):
+        """
+        Valideer de naam van het scenario.
+        Returns: (is_valid, error_message)
+        """
+        # Check of naam leeg is
+        if not naam or naam.strip() == "":
+            return False, "De naam van het scenario mag niet leeg zijn."
+        
+        # Check op dubbele namen
+        scenarios = self.get_noodcentraleAppModel().get_scenarios()
+        for scenario in scenarios:
+            scenario_id, scenario_naam, _ = scenario
+            # Als we aan het updaten zijn, skip dan het scenario dat we aan het bewerken zijn
+            if exclude_id and scenario_id == exclude_id:
+                continue
+            if scenario_naam.lower() == naam.lower():
+                return False, f"Een scenario met de naam '{naam}' bestaat al."
+        
+        return True, ""
+    
+    def validate_icon(self, icoon):
+        """
+        Valideer of het icoon bestand bestaat.
+        Returns: (is_valid, error_message)
+        """
+        import os
+        
+        # Check of icoon pad leeg is
+        if not icoon or icoon.strip() == "":
+            return False, "Het icoon bestandspad mag niet leeg zijn."
+        
+        # Controleer of het bestand bestaat
+        if not os.path.isfile(icoon):
+            return False, f"Het icoon bestand '{icoon}' bestaat niet."
+        
+        return True, ""
+    
+    def validate_icon_uniqueness(self, icoon, exclude_id=None):
+        """
+        Valideer of het icoon uniek is (niet al gebruikt door ander scenario).
+        Returns: (is_valid, error_message)
+        """
+        scenarios = self.get_noodcentraleAppModel().get_scenarios()
+        for scenario in scenarios:
+            scenario_id, _, scenario_icoon = scenario
+            # Als we aan het updaten zijn, skip dan het scenario dat we aan het bewerken zijn
+            if exclude_id and scenario_id == exclude_id:
+                continue
+            if scenario_icoon == icoon:
+                return False, f"Het icoon '{icoon}' wordt al gebruikt door een ander scenario."
+        
+        return True, ""
         
 #COMBINEER CONTROLLER
 class CombineerController():

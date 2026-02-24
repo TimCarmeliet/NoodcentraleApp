@@ -58,15 +58,24 @@ class PersonenView(tk.Frame):
         naam = self.entry_naam.get().strip()
         tel = self.entry_telefoonnummer.get().strip()
 
-        if not naam or not tel:
-            messagebox.showwarning(
-                "Fout",
-                "Gelieve naam en telefoonnummer in te vullen."
-            )
+        # Validatie: naam is ingevuld
+        is_valid, error_msg = self.controller.get_active_controller().validate_persoon_name(naam)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
+            return
+
+        # Validatie: telefoonnummer is ingevuld en uniek
+        is_valid, error_msg = self.controller.get_active_controller().validate_persoon_phone(tel)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
             return
 
         self.controller.get_active_controller().voeg_persoon_toe(naam, tel)
         self.refresh_tabel()
+        # Ledig de invoervelden na succesvol toevoegen
+        self.entry_naam.delete(0, tk.END)
+        self.entry_telefoonnummer.delete(0, tk.END)
+        messagebox.showinfo("Succes", f"Persoon '{naam}' succesvol toegevoegd!")
         if self.app_parent: 
             self.app_parent.refresh_dropdown_views() #refresh dropdowns in other views
 
@@ -83,18 +92,24 @@ class PersonenView(tk.Frame):
 
         item = self.tree.item(selected_item)
         persoon_id = item["values"][0]
+        persoon_naam = item["values"][1]
 
-        if not self.controller.get_active_controller().verwijder_persoon(persoon_id):
-            messagebox.showwarning(
-                "Fout",
-                "Deze persoon kan niet verwijderd worden omdat hij/zij aan een scenario is gekoppeld."
-            )
+        # Validatie: kan persoon verwijderd worden?
+        can_delete, error_msg = self.controller.get_active_controller().validate_persoon_deletion(persoon_id)
+        if not can_delete:
+            messagebox.showwarning("Kan niet verwijderen", error_msg)
             return
 
-        self.controller.get_active_controller().verwijder_persoon(persoon_id)
-        self.refresh_tabel()
-        if self.app_parent:
-            self.app_parent.refresh_dropdown_views()
+        # Bevestiging
+        if messagebox.askyesno("Bevestiging", f"Wilt u de persoon '{persoon_naam}' echt verwijderen?"):
+            self.controller.get_active_controller().verwijder_persoon(persoon_id)
+            self.refresh_tabel()
+            # Ledig de invoervelden na succesvol verwijderen
+            self.entry_naam.delete(0, tk.END)
+            self.entry_telefoonnummer.delete(0, tk.END)
+            messagebox.showinfo("Succes", "Persoon succesvol verwijderd!")
+            if self.app_parent:
+                self.app_parent.refresh_dropdown_views()
 
     def refresh_tabel(self):
         rows = self.controller.get_data()
@@ -121,15 +136,23 @@ class PersonenView(tk.Frame):
         naam = self.entry_naam.get().strip()
         tel = self.entry_telefoonnummer.get().strip()
 
-        if not naam or not tel:
-            messagebox.showwarning(
-                "Fout",
-                "Gelieve naam en telefoonnummer in te vullen."
-            )
+        # Validatie: naam is ingevuld
+        is_valid, error_msg = self.controller.get_active_controller().validate_persoon_name(naam, exclude_id=persoon_id)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
+            return
+
+        # Validatie: telefoonnummer is ingevuld en uniek
+        is_valid, error_msg = self.controller.get_active_controller().validate_persoon_phone(tel, exclude_id=persoon_id)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
             return
 
         self.controller.get_active_controller().werk_persoon_bij(persoon_id, naam, tel)
         self.refresh_tabel()
+        # Ledig de invoervelden na succesvol bijwerken
+        self.entry_naam.delete(0, tk.END)
+        self.entry_telefoonnummer.delete(0, tk.END)
         messagebox.showinfo("Succes", f"Persoon '{naam}' succesvol bijgewerkt!")
         if self.app_parent:
             self.app_parent.refresh_dropdown_views()

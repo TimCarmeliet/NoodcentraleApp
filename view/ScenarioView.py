@@ -51,9 +51,22 @@ class ScenarioView(tk.Frame):
         naam = self.entry_snaam.get().strip()
         icoon = self.entry_sicoon.get().strip()
 
-        #CONTROLE volledig ingevoerd?
-        if not naam or not icoon:
-            messagebox.showwarning("Fout", "Gelieve naam en de bestandsnaam van het icoon in te vullen.")
+        # Validatie: naam is ingevuld
+        is_valid, error_msg = self.controller.get_active_controller().validate_scenario_name(naam)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
+            return
+
+        # Validatie: icoon bestand bestaat
+        is_valid, error_msg = self.controller.get_active_controller().validate_icon(icoon)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
+            return
+
+        # Validatie: icoon is uniek
+        is_valid, error_msg = self.controller.get_active_controller().validate_icon_uniqueness(icoon)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
             return
 
         self.controller.get_active_controller().voeg_scenario_toe(naam, icoon)
@@ -63,7 +76,7 @@ class ScenarioView(tk.Frame):
         self.entry_sicoon.delete(0, tk.END)
         messagebox.showinfo("Succes", f"Scenario '{naam}' succesvol toegevoegd!")
         if self.app_parent:
-            self.app_parent.refresh_dropdown_views() #refresh dropdowns in other views
+            self.app_parent.refresh_dropdown_views() # Refresh de dropdowns in de andere views
 
     def werk_scenario_bij(self):
         # Zorg dat we de juiste controller gebruiken
@@ -82,12 +95,22 @@ class ScenarioView(tk.Frame):
         naam = self.entry_snaam.get().strip()
         icoon = self.entry_sicoon.get().strip()
 
-        #CONTROLE volledig ingevoerd?
-        if not naam or not icoon:
-            messagebox.showwarning(
-                "Fout",
-                "Gelieve naam en de bestandsnaam van het icoon in te vullen."
-            )
+        # Validatie: naam is ingevuld
+        is_valid, error_msg = self.controller.get_active_controller().validate_scenario_name(naam, exclude_id=scenario_id)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
+            return
+
+        # Validatie: icoon bestand bestaat
+        is_valid, error_msg = self.controller.get_active_controller().validate_icon(icoon)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
+            return
+
+        # Validatie: icoon is uniek
+        is_valid, error_msg = self.controller.get_active_controller().validate_icon_uniqueness(icoon, exclude_id=scenario_id)
+        if not is_valid:
+            messagebox.showwarning("Validatiefout", error_msg)
             return
 
         self.controller.get_active_controller().werk_scenario_bij(scenario_id, naam, icoon)
@@ -97,7 +120,7 @@ class ScenarioView(tk.Frame):
         self.entry_sicoon.delete(0, tk.END)
         messagebox.showinfo("Succes", f"Scenario '{naam}' succesvol bijgewerkt!")
         if self.app_parent:
-            self.app_parent.refresh_dropdown_views() #refresh dropdowns in other views
+            self.app_parent.refresh_dropdown_views() # Refresh dropdowns in andere views
         
     """
     def verwijder_scenario(self):
@@ -121,23 +144,24 @@ class ScenarioView(tk.Frame):
 
         item = self.s_tree.item(scenario_id)
         scenario_id = item["values"][0]
+        scenario_naam = item["values"][1]
 
-        if not self.controller.get_active_controller().verwijder_scenario(scenario_id):
-            messagebox.showwarning(
-                "Fout",
-                "Dit scenario kan niet verwijderd worden."
-                " Gelieve eerst alle gekoppelde stappen en gebruikers te verwijderen."
-            )
+        # Validatie: kan scenario verwijderd worden?
+        can_delete, error_msg = self.controller.get_active_controller().validate_scenario_deletion(scenario_id)
+        if not can_delete:
+            messagebox.showwarning("Kan niet verwijderen", error_msg)
             return
 
-        self.controller.get_active_controller().verwijder_scenario(scenario_id)
-        self.refresh_scenario_tabel()
-        # Ledig de invoervelden na succesvol verwijderen
-        self.entry_snaam.delete(0, tk.END)
-        self.entry_sicoon.delete(0, tk.END)
-        messagebox.showinfo("Succes", "Scenario succesvol verwijderd!")
-        if self.app_parent:
-            self.app_parent.refresh_dropdown_views()
+        # Bevestiging
+        if messagebox.askyesno("Bevestiging", f"Wilt u het scenario '{scenario_naam}' echt verwijderen?"):
+            self.controller.get_active_controller().verwijder_scenario(scenario_id)
+            self.refresh_scenario_tabel()
+            # Ledig de invoervelden na succesvol verwijderen
+            self.entry_snaam.delete(0, tk.END)
+            self.entry_sicoon.delete(0, tk.END)
+            messagebox.showinfo("Succes", "Scenario succesvol verwijderd!")
+            if self.app_parent:
+                self.app_parent.refresh_dropdown_views()
 
     def refresh_scenario_tabel(self):
         rows = self.controller.get_data()
