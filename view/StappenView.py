@@ -4,8 +4,8 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.button import MDFillRoundFlatButton, MDRaisedButton, MDFlatButton, MDFloatingActionButton
 from kivymd.uix.list import MDList
-from .components import ModernEditOverlay, EditCard
-from kivymd.uix.list import ThreeLineAvatarIconListItem, IconLeftWidget
+from .components import ModernEditOverlay, EditCard, HoverThreeLineListItem
+from kivymd.uix.list import IconLeftWidget
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.toast import toast
 from kivymd.uix.textfield import MDTextField
@@ -45,7 +45,7 @@ class StappenView(MDFloatLayout, MDTabsBase):
         scenarios = self.controller.get_active_controller().get_scenarios()
         
         self.overlay = ModernEditOverlay()
-        card = EditCard(size_hint=(0.9, None), height=dp(450))
+        card = EditCard()
         
         # Title
         title_text = "Stap Bewerken" if stap_data else "Nieuwe Stap"
@@ -176,7 +176,7 @@ class StappenView(MDFloatLayout, MDTabsBase):
             text = f"{s_naam} - Stap {row[3]}"
             secondary = f"{row[2] or 'actie'}: {row[4][:40]}..." if len(row[4]) > 40 else f"{row[2] or 'actie'}: {row[4]}"
             
-            item = ThreeLineAvatarIconListItem(
+            item = HoverThreeLineListItem(
                 text=text, 
                 secondary_text=f"Actie: {row[2] or 'geen'}",
                 tertiary_text=f"Bericht: {row[4]}",

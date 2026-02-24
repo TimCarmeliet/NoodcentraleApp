@@ -9,8 +9,8 @@ from kivymd.toast import toast
 from kivy.metrics import dp
 from kivymd.app import MDApp
 from kivy.core.window import Window
-from .components import ModernEditOverlay, EditCard
-from kivymd.uix.list import TwoLineAvatarIconListItem, IconLeftWidget
+from .components import ModernEditOverlay, EditCard, HoverTwoLineListItem
+from kivymd.uix.list import IconLeftWidget
 
 class ScenarioView(MDFloatLayout, MDTabsBase):
     def __init__(self, controller, **kwargs):
@@ -37,7 +37,19 @@ class ScenarioView(MDFloatLayout, MDTabsBase):
 
     def open_edit_dialog(self, scenario_data=None):
         self.overlay = ModernEditOverlay()
-        card = EditCard(size_hint=(0.85, None), height=dp(300))
+        card = EditCard()
+        
+        from kivymd.uix.label import MDLabel
+        title = MDLabel(
+            text="Scenario Bewerken" if scenario_data else "Nieuw Scenario",
+            halign="center",
+            font_style="H6",
+            theme_text_color="Custom",
+            text_color=[1, 1, 1, 1],
+            size_hint_y=None,
+            height=dp(40)
+        )
+        card.add_widget(title)
         
         name_field = MDTextField(hint_text="Naam Scenario", mode="rectangle")
         icon_field = MDTextField(hint_text="Icoon bestandsnaam", mode="rectangle")
@@ -110,7 +122,7 @@ class ScenarioView(MDFloatLayout, MDTabsBase):
         rows = self.controller.get_data()
         self.list_container.clear_widgets()
         for row in rows:
-            item = TwoLineAvatarIconListItem(
+            item = HoverTwoLineListItem(
                 text=row[1],
                 secondary_text=f"Icoon: {row[2]}"
             )

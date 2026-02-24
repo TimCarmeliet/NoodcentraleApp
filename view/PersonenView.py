@@ -10,8 +10,8 @@ from kivy.metrics import dp
 from kivymd.app import MDApp
 from kivy.core.window import Window
 
-from .components import ModernEditOverlay, EditCard, RealGradientListItem
-from kivymd.uix.list import TwoLineAvatarIconListItem, IconLeftWidget
+from .components import ModernEditOverlay, EditCard, RealGradientListItem, HoverTwoLineListItem
+from kivymd.uix.list import IconLeftWidget
 
 class PersonenView(MDFloatLayout, MDTabsBase):
     def __init__(self, controller, **kwargs):
@@ -46,7 +46,19 @@ class PersonenView(MDFloatLayout, MDTabsBase):
         """
         self.overlay = ModernEditOverlay()
         
-        card = EditCard(size_hint=(0.85, None), height=dp(300))
+        card = EditCard()
+        
+        from kivymd.uix.label import MDLabel
+        title = MDLabel(
+            text="Persoon Bewerken" if person_data else "Nieuwe Persoon",
+            halign="center",
+            font_style="H6",
+            theme_text_color="Custom",
+            text_color=[1, 1, 1, 1],
+            size_hint_y=None,
+            height=dp(40)
+        )
+        card.add_widget(title)
         
         # Form Fields
         name_field = MDTextField(hint_text="Naam", mode="rectangle")
@@ -122,7 +134,7 @@ class PersonenView(MDFloatLayout, MDTabsBase):
         
         for row in rows:
             # row: (id, naam, telefoonnummer)
-            item = TwoLineAvatarIconListItem(
+            item = HoverTwoLineListItem(
                 text=row[1],
                 secondary_text=f"Tel: {row[2]}"
             )

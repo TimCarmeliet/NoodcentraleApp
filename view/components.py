@@ -10,7 +10,7 @@ from kivy.metrics import dp
 from kivymd.app import MDApp
 from kivymd.uix.label import MDLabel, MDIcon
 from kivy.uix.behaviors import ButtonBehavior
-from kivymd.uix.behaviors import RectangularRippleBehavior
+from kivymd.uix.behaviors import RectangularRippleBehavior, HoverBehavior
 from kivy.graphics import Color, Rectangle, Ellipse
 from kivy.graphics.texture import Texture
 from kivy.lang import Builder
@@ -154,9 +154,12 @@ class GradientCard(MDCard):
         Clock.schedule_once(self.update_gradient)
 
     def update_gradient(self, *args):
+        # Default radius if self.radius is empty or not set correctly
+        rad = self.radius if hasattr(self, 'radius') and self.radius else [dp(20)]
         if not self.gradient_rect:
+            from kivy.graphics import RoundedRectangle
             with self.canvas.before:
-                self.gradient_rect = Rectangle(pos=self.pos, size=self.size)
+                self.gradient_rect = RoundedRectangle(pos=self.pos, size=self.size, radius=rad)
 
         texture = Texture.create(size=(2, 1), colorfmt='rgba')
         c1 = [int(c * 255) for c in self.gradient_colors[0]]
@@ -166,6 +169,8 @@ class GradientCard(MDCard):
         
         self.gradient_rect.pos = self.pos
         self.gradient_rect.size = self.size
+        # Update radius dynamically if it changed
+        self.gradient_rect.radius = self.radius if hasattr(self, 'radius') and self.radius else [dp(20)]
         self.gradient_rect.texture = texture
 
 class ImmersiveCard(GradientCard, RectangularRippleBehavior, ButtonBehavior):
@@ -233,6 +238,12 @@ class ImmersiveCard(GradientCard, RectangularRippleBehavior, ButtonBehavior):
         )
         self.text_box.add_widget(lbl_sub)
 
+    def on_enter(self, *args):
+        Window.set_system_cursor('hand')
+        
+    def on_leave(self, *args):
+        Window.set_system_cursor('arrow')
+
 class ModernEditOverlay(MDFloatLayout):
     content_widget = ObjectProperty(None)
     
@@ -270,8 +281,8 @@ class EditCard(GradientCard):
              kwargs["gradient_colors"] = [[0.18, 0.15, 0.25, 1], [0.1, 0.08, 0.15, 1]]
         super().__init__(**kwargs)
         self.orientation = "vertical"
-        self.size_hint = (0.85, None)
-        self.height = dp(320)
+        self.size_hint_x = 0.85
+        self.adaptive_height = True
         self.padding = dp(25)
         self.spacing = dp(15)
         self.radius = [dp(20)]
@@ -301,6 +312,12 @@ class RealGradientListItem(GradientCard, RectangularRippleBehavior, ButtonBehavi
             self.add_widget(MDLabel(text=self.secondary_text, font_style="Body2", theme_text_color="Custom", text_color=[0.9,0.9,0.9,1]))
         if self.tertiary_text:
             self.add_widget(MDLabel(text=self.tertiary_text, font_style="Caption", theme_text_color="Custom", text_color=[0.7,0.7,0.7,1]))
+
+    def on_enter(self, *args):
+        Window.set_system_cursor('hand')
+
+    def on_leave(self, *args):
+        Window.set_system_cursor('arrow')
 
 
 class ModernListItem(MDBoxLayout, RectangularRippleBehavior, ButtonBehavior):
@@ -365,6 +382,26 @@ class ModernListItem(MDBoxLayout, RectangularRippleBehavior, ButtonBehavior):
             ))
         self.add_widget(text_box)
 
+from kivymd.uix.list import TwoLineAvatarIconListItem, ThreeLineAvatarIconListItem
+
+class HoverTwoLineListItem(TwoLineAvatarIconListItem, HoverBehavior):
+    def on_enter(self, *args):
+        self.bg_color = [0.25, 0.2, 0.35, 1]
+        Window.set_system_cursor('hand')
+        
+    def on_leave(self, *args):
+        self.bg_color = [0, 0, 0, 0]
+        Window.set_system_cursor('arrow')
+
+class HoverThreeLineListItem(ThreeLineAvatarIconListItem, HoverBehavior):
+    def on_enter(self, *args):
+        self.bg_color = [0.25, 0.2, 0.35, 1]
+        Window.set_system_cursor('hand')
+        
+    def on_leave(self, *args):
+        self.bg_color = [0, 0, 0, 0]
+        Window.set_system_cursor('arrow')
+
 
 class ImmersiveExecutionOverlay(MDFloatLayout):
     step_text = StringProperty("")
@@ -398,7 +435,7 @@ class ImmersiveExecutionOverlay(MDFloatLayout):
         self.lbl_step = MDLabel(
             text=self.step_text,
             halign="center",
-            font_style="H4",
+            font_style="H5",
             theme_text_color="Custom",
             text_color=[1, 1, 1, 1],
             size_hint_y=0.4
@@ -518,10 +555,21 @@ class ScenarioTile(MDCard, RectangularRippleBehavior, ButtonBehavior):
             font_style="Subtitle1",
             theme_text_color="Custom",
             text_color=[1, 1, 1, 1],
-            bold=True,
             size_hint_y=0.4
         )
         self.add_widget(self.lbl_text)
+
+    def on_enter(self, *args):
+        r, g, b, a = self.bg_color
+        target = [min(1, r + 0.12), min(1, g + 0.12), min(1, b + 0.12), a]
+        anim = Animation(md_bg_color=target, duration=0.15)
+        anim.start(self)
+        Window.set_system_cursor('hand')
+
+    def on_leave(self, *args):
+        anim = Animation(md_bg_color=self.bg_color, duration=0.2)
+        anim.start(self)
+        Window.set_system_cursor('arrow')
 
 # =====================================================
 # MODERN DASHBOARD COMPONENTS
@@ -553,7 +601,7 @@ Builder.load_string('''
             radius: [dp(18), dp(18), dp(4), dp(4)]
 ''')
 
-class DashboardCard(MDBoxLayout, RectangularRippleBehavior, ButtonBehavior):
+class DashboardCard(HoverBehavior, RectangularRippleBehavior, ButtonBehavior, MDBoxLayout):
     """Modern glassmorphism card with icon, title and subtitle"""
     
     icon_name = StringProperty("alert")
@@ -672,6 +720,16 @@ class DashboardCard(MDBoxLayout, RectangularRippleBehavior, ButtonBehavior):
     def on_release(self):
         anim = Animation(glow_alpha=0, shine_alpha=0.08, duration=0.3)
         anim.start(self)
+
+    def on_enter(self, *args):
+        anim = Animation(glow_alpha=0.5, shine_alpha=0.12, duration=0.15)
+        anim.start(self)
+        Window.set_system_cursor('hand')
+
+    def on_leave(self, *args):
+        anim = Animation(glow_alpha=0, shine_alpha=0.08, duration=0.2)
+        anim.start(self)
+        Window.set_system_cursor('arrow')
 
 
 class AnimatedGridLayout(MDGridLayout):

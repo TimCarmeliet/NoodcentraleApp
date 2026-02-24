@@ -138,6 +138,7 @@ class MainScreen(MDScreen):
         elif actie == "stuur":
             if "XXX" in bericht and self.current_locatie:
                 bericht = bericht.replace("XXX", self.current_locatie)
+            bericht = f"Verzonden Bericht:\n{bericht}"
         
         self.execution_overlay.setup_step(bericht, type=step_type, callback=callback)
 

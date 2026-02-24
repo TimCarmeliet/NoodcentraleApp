@@ -11,8 +11,8 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.app import MDApp
 from kivy.metrics import dp
 from kivy.core.window import Window
-from .components import ModernEditOverlay, EditCard
-from kivymd.uix.list import TwoLineAvatarIconListItem, IconLeftWidget
+from .components import ModernEditOverlay, EditCard, HoverTwoLineListItem
+from kivymd.uix.list import IconLeftWidget
 
 class CombineerView(MDFloatLayout, MDTabsBase):
     def __init__(self, controller, **kwargs):
@@ -49,7 +49,7 @@ class CombineerView(MDFloatLayout, MDTabsBase):
         scenarios = self.controller.get_active_controller().get_scenarios()
         
         self.overlay = ModernEditOverlay()
-        card = EditCard(size_hint=(0.9, None), height=dp(400))
+        card = EditCard()
         
         # Title
         title = MDLabel(
@@ -184,7 +184,7 @@ class CombineerView(MDFloatLayout, MDTabsBase):
             s_naam = scenario_naam_list[0][0] if scenario_naam_list else "?"
             u_naam = user_naam_list[0][0] if user_naam_list else "?"
             
-            item = TwoLineAvatarIconListItem(
+            item = HoverTwoLineListItem(
                 text=u_naam,
                 secondary_text=f"Scenario: {s_naam}",
             )
